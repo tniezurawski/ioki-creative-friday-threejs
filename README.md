@@ -4,4 +4,5 @@
 <p>Learning threejs and other things that are useful in WebGL development.<br/>
 Thanks to IOKI.
 </p>
-
+<h3>cube-rotation.html</h3>
+<p>Use WSAD to play with cube rotation</p>
