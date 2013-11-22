@@ -48,40 +48,74 @@ var scene = new THREE.Scene(),
 	projector = new THREE.Projector();
 
 renderer.setSize(window.innerWidth, window.innerHeight);
+renderer.shadowMapEnabled = true;
+renderer.shadowMapSoft = false;
+
+renderer.shadowCameraNear = 3;
+renderer.shadowCameraFar = camera.far;
+renderer.shadowCameraFov = 50;
+
+renderer.shadowMapBias = 0.0039;
+renderer.shadowMapDarkness = 0.5;
+renderer.shadowMapWidth = 1024;
+renderer.shadowMapHeight = 1024;
 document.body.appendChild(renderer.domElement);
 
 // objects
 var geometry = new THREE.CubeGeometry(4,4,4),
 	material = new THREE.MeshLambertMaterial( {color: config.cubeColor, wireframe: config.wireframe} ),
 	cube = new THREE.Mesh(geometry, material),
-	directionalLight = new THREE.DirectionalLight(0xffffff),
-	ambientLight = new THREE.AmbientLight(0x000044),
+	directionalLight = new THREE.DirectionalLight(0xffffff, 1),
+	// ambientLight = new THREE.AmbientLight(0x000044),
 	planeGeometry = new THREE.PlaneGeometry( 15, 15 ),
-	planeMaterial = new THREE.MeshBasicMaterial( { color: 0xe0e0e0, overdraw: 0.5 } ),
+	planeMaterial = new THREE.MeshLambertMaterial( { color: 0xe0e0e0, overdraw: 0.5 } ),
 	plane = new THREE.Mesh( planeGeometry, planeMaterial );
 
 // add objects to OBJECTS_ARRAY
-objects.push(new item(cube, 'cube', config.cubeColor), new item(plane, 'plane', '#e0e0e0'));
+objects.push(
+	new item(cube, 'cube', config.cubeColor),
+	new item(plane, 'plane', '#e0e0e0')
+);
 
 // set objects
 cube.rotation.x = 10;
 cube.position.y = 1.5;
+cube.castShadow = true;
+cube.receiveShadow = true;
 // plane.rotation.z = degrees(-90);
 plane.rotation.x = degrees(-75);
 plane.rotation.z = degrees(45);
 plane.position.y = -2;
+plane.castShadow = true;
+plane.receiveShadow = true;
 // plane.position.z = -100;
 
-directionalLight.position.set(1, 1, 1).normalize();
+directionalLight.position.x = -100;
+directionalLight.position.y = 150;
+// directionalLight.position.set(1, 1, 1).normalize();
+// directionalLight.castShadow = true;
+// directionalLight.shadowCameraVisible = true;
+directionalLight.position.set(0, 2, 2);
+directionalLight.target.position.set(0, 0, 0);
+directionalLight.castShadow = true;
+directionalLight.shadowDarkness = 0.5;
+directionalLight.shadowCameraVisible = true; // only for debugging
+// these six values define the boundaries of the yellow box seen above
+directionalLight.shadowCameraNear = 2;
+directionalLight.shadowCameraFar = 5;
+directionalLight.shadowCameraLeft = -5;
+directionalLight.shadowCameraRight = 5;
+directionalLight.shadowCameraTop = 5;
+directionalLight.shadowCameraBottom = -5;
 
 // add objects to scene
 scene.add(cube);
 scene.add(plane);
 scene.add(directionalLight);
-scene.add(ambientLight);
+// scene.add(ambientLight);
 
 // camera settings
-camera.position.z = 20;
+camera.position.z = 30;
 camera.position.y = -1;
 camera.lookAt(scene.position);
 
@@ -93,8 +127,8 @@ gui.add(config, 'angularSpeed', -5, 5).name('Rotation speed');
 gui.add(config, 'step', 0.01, 0.3).name('Step');
 
 guiCubeColor.onChange( function( colorValue  ){
-  colorValue=colorValue.replace( '#','0x' );
-  cube.material.color.setHex(colorValue);
+	objects[0].color = colorValue;
+  	cube.material.color.setHex(hashToHex(colorValue));
 });
 guiCubeWireframe.onChange( function( wireframe  ){
 	cube.material.wireframe = wireframe;
