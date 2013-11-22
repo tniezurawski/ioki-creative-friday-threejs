@@ -10,5 +10,6 @@ Thanks to IOKI.
 	<ul>
 		<li>Use WSAD to play with cube rotation</li>
 		<li>You can select object by clicking on it</li>
+		<li>Use Z and C to rotate camera left and right</li>
 	</ul>
 </p>

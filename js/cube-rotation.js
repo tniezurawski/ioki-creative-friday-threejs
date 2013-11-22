@@ -11,6 +11,7 @@ var Configuration = function(){
 
 	// visual
 	this.cubeColor = '#00ffc3';
+	this.camera_rotation = 0;
 }
 
 var item = function(obj, name, color){
@@ -82,6 +83,7 @@ scene.add(ambientLight);
 // camera settings
 camera.position.z = 20;
 camera.position.y = -1;
+camera.lookAt(scene.position);
 
 // GUI settings
 var guiCubeColor = gui.addColor(config, 'cubeColor').name('Cube color'),
@@ -107,7 +109,7 @@ function render(){
 	lastTime = time;
 
 	if(config.isAutorotate){
-		cube.rotation.y += angleChange;	
+		cube.rotation.y += angleChange;
 	}
 
 	renderer.render(scene,camera);
@@ -162,6 +164,23 @@ function clearSelection(){
 	}
 }
 
+function cameraRotation(direction){
+	var x, y, z;
+
+	if(direction == 'left'){
+		config.camera_rotation += config.step;
+	}else{
+		config.camera_rotation -= config.step;
+	}
+
+	x = 20 * Math.sin(config.camera_rotation);
+	z = 20 * Math.cos(config.camera_rotation);
+
+    camera.position.x = x;
+    camera.position.z = z;
+    camera.lookAt(scene.position);
+}
+
 function degrees(n){
 	return n * Math.PI/180;
 }
@@ -195,4 +214,12 @@ keypress.combo("a", function() {
 keypress.combo("d", function() {
     cube.rotation.y -= config.step;
     stopAutorotate();
+});
+
+keypress.combo("z", function() {
+	cameraRotation('left');
+});
+
+keypress.combo("c", function() {
+	cameraRotation('right');
 });
