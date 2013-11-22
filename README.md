@@ -1,3 +1,7 @@
-Learning threejs in progress thanks to Creative Fridays in IOKI.
+<h1>Creative Fridays: Learning Threejs</h1>
+<p>author: Tomasz Nieżurawski</p>
+<h2>Basic aim of project</h2>
+<p>Learning threejs and other things that are useful in WebGL development.<br/>
+Thanks to IOKI.
+</p>
 
-author: Tomasz Nieżurawski
