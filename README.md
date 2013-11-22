@@ -5,4 +5,10 @@
 Thanks to IOKI.
 </p>
 <h3>cube-rotation.html</h3>
-<p>Use WSAD to play with cube rotation</p>
+<p>Features:</p>
+<p>
+	<ul>
+		<li>Use WSAD to play with cube rotation</li>
+		<li>You can select object by clicking on it</li>
+	</ul>
+</p>

@@ -6,16 +6,19 @@ var Configuration = function(){
 	this.wireframe = false;
 	this.step = 0.1;
 
-	this.planeX = 0;
-	this.planeY = 0;
-	this.planeZ = 0;
-
 	// timeouts
 	this.autorotateTimeout;
 
 	// visual
 	this.cubeColor = '#00ffc3';
 }
+
+var item = function(obj, name, color){
+		this.obj = obj;
+		this.name = name;
+		this.color = color;
+	},
+	objects = [];
 
 var config = new Configuration(),
 	lastTime = 0,
@@ -56,9 +59,12 @@ var geometry = new THREE.CubeGeometry(4,4,4),
 	planeMaterial = new THREE.MeshBasicMaterial( { color: 0xe0e0e0, overdraw: 0.5 } ),
 	plane = new THREE.Mesh( planeGeometry, planeMaterial );
 
+// add objects to OBJECTS_ARRAY
+objects.push(new item(cube, 'cube', config.cubeColor), new item(plane, 'plane', '#e0e0e0'));
+
 // set objects
 cube.rotation.x = 10;
-cube.position.y = 1.2;
+cube.position.y = 1.5;
 // plane.rotation.z = degrees(-90);
 plane.rotation.x = degrees(-75);
 plane.rotation.z = degrees(45);
@@ -83,9 +89,6 @@ var guiCubeColor = gui.addColor(config, 'cubeColor').name('Cube color'),
 
 gui.add(config, 'angularSpeed', -5, 5).name('Rotation speed');
 gui.add(config, 'step', 0.01, 0.3).name('Step');
-// gui.add(config, 'planeX');
-// gui.add(config, 'planeY');
-// gui.add(config, 'planeZ');
 
 guiCubeColor.onChange( function( colorValue  ){
   colorValue=colorValue.replace( '#','0x' );
@@ -104,13 +107,8 @@ function render(){
 	lastTime = time;
 
 	if(config.isAutorotate){
-		// console.log('cube.rotation.y: ' + cube.rotation.y);
 		cube.rotation.y += angleChange;	
 	}
-	// else{
-	// 	// console.log('cube.rotation.y: ' + cube.rotation.y + ' targetRotation: ' + targetRotation * 0.01)
-	// 	cube.rotation.y += targetRotation * 0.01;
-	// }
 
 	renderer.render(scene,camera);
 
@@ -130,8 +128,52 @@ function stopAutorotate(){
 		startAutoratate();
 	},1000);
 }
+
 function startAutoratate(){
 	config.isAutorotate = true;
+}
+
+function onDocumentMouseDown( event ) {
+	var vector, raycaster, intersects;
+
+	event.preventDefault();
+
+	vector = new THREE.Vector3( ( event.clientX / window.innerWidth ) * 2 - 1, - ( event.clientY / window.innerHeight ) * 2 + 1, 0.5 );
+	projector.unprojectVector( vector, camera );
+	raycaster = new THREE.Raycaster( camera.position, vector.sub( camera.position ).normalize() );
+
+	intersects = raycaster.intersectObjects(scene.children);
+
+	if ( intersects.length > 0 ){
+		selectObjectOnScreen(intersects[0], '5e66eb');
+	}else{
+		clearSelection();
+	}
+}
+
+function selectObjectOnScreen(intersect, color){
+	clearSelection();
+	intersect.object.material.color.setHex('0x' + color);
+}
+
+function clearSelection(){
+	for(var i = 0, length = objects.length; i < length; i++){
+		objects[i].obj.material.color.setHex(hashToHex(objects[i].color));
+	}
+}
+
+function degrees(n){
+	return n * Math.PI/180;
+}
+
+function hexToHash(hex){
+	var hash = hex.replace( '0x','#' );
+	return hash;
+}
+
+function hashToHex(hash){
+	var hex = hash.replace( '#','0x' );
+	return hex;
 }
 
 // keypress
@@ -154,30 +196,3 @@ keypress.combo("d", function() {
     cube.rotation.y -= config.step;
     stopAutorotate();
 });
-
-
-function onDocumentMouseDown( event ) {
-	var vector, raycaster, intersects;
-
-	event.preventDefault();
-
-	vector = new THREE.Vector3( ( event.clientX / window.innerWidth ) * 2 - 1, - ( event.clientY / window.innerHeight ) * 2 + 1, 0.5 );
-	projector.unprojectVector( vector, camera );
-	raycaster = new THREE.Raycaster( camera.position, vector.sub( camera.position ).normalize() );
-
-	intersects = raycaster.intersectObjects(scene.children);
-
-	if ( intersects.length > 0 ){
-		intersects[0].object.material.color.setHex('0x111fff');
-		guiCubeColor.setValue('#111fff');
-		makeColorful(intersects[0]);
-	}
-}
-
-function makeColorful(object){
-	console.log(object);
-}
-
-function degrees(n){
-	return n * Math.PI/180;
-}
