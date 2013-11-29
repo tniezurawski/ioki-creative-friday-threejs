@@ -25,8 +25,10 @@ var config = new Configuration(),
 	lastTime = 0,
 	windowHalfX = window.innerWidth / 2,
 	windowHalfY = window.innerHeight / 2,
-	targetRotation = 0,
-	targetRotationOnMouseDown = 0;
+	targetRotationX = targetRotationY = 0,
+	targetRotationXOnMouseDown = targetRotationYOnMouseDown = 0,
+	mouseX = mouseY = 0,
+	mouseXOnMouseDown = mouseYOnMouseDown = 0;
 
 // GUI
 var gui = new dat.GUI();
@@ -138,17 +140,16 @@ function render(){
 
 	lastTime = time;
 
-	if(config.isAutorotate){
-		cube.rotation.y += angleChange;
-	}
+	cube.rotation.y += ( targetRotationX - cube.rotation.y ) * 0.05;
+	cube.rotation.x += ( targetRotationY - cube.rotation.x ) * 0.05;
 
-	pointLight.position.x = Math.sin( lightTime * 0.7 ) * 5;
+	// pointLight.position.x = Math.sin( lightTime * 0.7 ) * 5;
 	// pointLight.position.y = Math.cos( lightTime * 0.7 ) * 5;
-	pointLight.position.z = Math.cos( lightTime * 0.7 ) * 5;
+	// pointLight.position.z = Math.cos( lightTime * 0.7 ) * 5;
 
-	pointLight2.position.x = Math.sin( lightTime * 0.7 ) * -5;
+	// pointLight2.position.x = Math.sin( lightTime * 0.7 ) * -5;
 	// pointLight2.position.y = Math.cos( lightTime * 0.7 ) * 5;
-	pointLight2.position.z = Math.cos( lightTime * 0.7 ) * -5;
+	// pointLight2.position.z = Math.cos( lightTime * 0.7 ) * -5;
 
 	pointLight3.position.x = Math.sin( lightTime * 0.7 ) * -5;
 	pointLight3.position.y = Math.cos( lightTime * 0.5 ) * -8;
@@ -163,6 +164,8 @@ function render(){
 render();
 
 document.addEventListener( 'mousedown', onDocumentMouseDown, false );
+document.addEventListener( 'touchstart', onDocumentTouchStart, false );
+document.addEventListener( 'touchmove', onDocumentTouchMove, false );
 
 // other functions
 function stopAutorotate(){
@@ -177,21 +180,81 @@ function startAutoratate(){
 	config.isAutorotate = true;
 }
 
+// function onDocumentMouseDown( event ) {
+// 	var vector, raycaster, intersects;
+
+// 	event.preventDefault();
+
+// 	vector = new THREE.Vector3( ( event.clientX / window.innerWidth ) * 2 - 1, - ( event.clientY / window.innerHeight ) * 2 + 1, 0.5 );
+// 	projector.unprojectVector( vector, camera );
+// 	raycaster = new THREE.Raycaster( camera.position, vector.sub( camera.position ).normalize() );
+
+// 	intersects = raycaster.intersectObjects(scene.children);
+
+// 	if ( intersects.length > 0 ){
+// 		selectObjectOnScreen(intersects[0], '5e66eb');
+// 	}else{
+// 		clearSelection();
+// 	}
+// }
+
 function onDocumentMouseDown( event ) {
-	var vector, raycaster, intersects;
 
 	event.preventDefault();
 
-	vector = new THREE.Vector3( ( event.clientX / window.innerWidth ) * 2 - 1, - ( event.clientY / window.innerHeight ) * 2 + 1, 0.5 );
-	projector.unprojectVector( vector, camera );
-	raycaster = new THREE.Raycaster( camera.position, vector.sub( camera.position ).normalize() );
+	document.addEventListener( 'mousemove', onDocumentMouseMove, false );
+	document.addEventListener( 'mouseup', onDocumentMouseUp, false );
+	document.addEventListener( 'mouseout', onDocumentMouseOut, false );
 
-	intersects = raycaster.intersectObjects(scene.children);
+	mouseXOnMouseDown = event.clientX - windowHalfX;
+	mouseYOnMouseDown = event.clientY - windowHalfY;
+	targetRotationXOnMouseDown = targetRotationX;
+	targetRotationYOnMouseDown = targetRotationY;
+}
 
-	if ( intersects.length > 0 ){
-		selectObjectOnScreen(intersects[0], '5e66eb');
-	}else{
-		clearSelection();
+function onDocumentMouseMove( event ) {
+	/*
+		TODO: add custom cursor
+	*/
+	mouseX = event.clientX - windowHalfX;
+	mouseY = event.clientY - windowHalfY;
+
+	targetRotationX = targetRotationXOnMouseDown + ( mouseX - mouseXOnMouseDown ) * 0.02;
+	targetRotationY = targetRotationYOnMouseDown + ( mouseY - mouseYOnMouseDown ) * 0.02;
+}
+
+function onDocumentMouseUp( event ) {
+	/*
+		TODO: remove custom cursor
+	*/
+	document.removeEventListener( 'mousemove', onDocumentMouseMove, false );
+	document.removeEventListener( 'mouseup', onDocumentMouseUp, false );
+	document.removeEventListener( 'mouseout', onDocumentMouseOut, false );
+}
+
+function onDocumentMouseOut( event ) {
+	document.removeEventListener( 'mousemove', onDocumentMouseMove, false );
+	document.removeEventListener( 'mouseup', onDocumentMouseUp, false );
+	document.removeEventListener( 'mouseout', onDocumentMouseOut, false );
+}
+
+function onDocumentTouchStart( event ) {
+	if ( event.touches.length == 1 ) {
+		event.preventDefault();
+		mouseXOnMouseDown = event.touches[ 0 ].pageX - windowHalfX;
+		mouseYOnMouseDown = event.touches[ 0 ].pageY - windowHalfY;
+		targetRotationXOnMouseDown = targetRotationX;
+		targetRotationYOnMouseDown = targetRotationY;
+	}
+}
+
+function onDocumentTouchMove( event ) {
+	if ( event.touches.length == 1 ) {
+		event.preventDefault();
+		mouseX = event.touches[ 0 ].pageX - windowHalfX;
+		mouseY = event.touches[ 0 ].pageY - windowHalfY;
+		targetRotationX = targetRotationXOnMouseDown + ( mouseX - mouseXOnMouseDown ) * 0.05;
+		targetRotationY = targetRotationYOnMouseDown + ( mouseY - mouseYOnMouseDown ) * 0.05;
 	}
 }
 

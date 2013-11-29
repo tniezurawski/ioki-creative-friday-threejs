@@ -17,7 +17,7 @@ Thanks to IOKI.
 <p>Features:</p>
 <p>
 	<ul>
-		<li>the same like cube-ratation</li>
 		<li>observe lights :P</li>
+		<li>play with mouse to rotate the cube</li>
 	</ul>
 </p>
