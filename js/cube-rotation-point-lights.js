@@ -143,13 +143,13 @@ function render(){
 	cube.rotation.y += ( targetRotationX - cube.rotation.y ) * 0.05;
 	cube.rotation.x += ( targetRotationY - cube.rotation.x ) * 0.05;
 
-	// pointLight.position.x = Math.sin( lightTime * 0.7 ) * 5;
+	pointLight.position.x = Math.sin( lightTime * 0.7 ) * 5;
 	// pointLight.position.y = Math.cos( lightTime * 0.7 ) * 5;
-	// pointLight.position.z = Math.cos( lightTime * 0.7 ) * 5;
+	pointLight.position.z = Math.cos( lightTime * 0.7 ) * 5;
 
-	// pointLight2.position.x = Math.sin( lightTime * 0.7 ) * -5;
+	pointLight2.position.x = Math.sin( lightTime * 0.7 ) * -5;
 	// pointLight2.position.y = Math.cos( lightTime * 0.7 ) * 5;
-	// pointLight2.position.z = Math.cos( lightTime * 0.7 ) * -5;
+	pointLight2.position.z = Math.cos( lightTime * 0.7 ) * -5;
 
 	pointLight3.position.x = Math.sin( lightTime * 0.7 ) * -5;
 	pointLight3.position.y = Math.cos( lightTime * 0.5 ) * -8;
