@@ -13,3 +13,11 @@ Thanks to IOKI.
 		<li>Use Z and C to rotate camera left and right</li>
 	</ul>
 </p>
+<h3>cube-rotation-point-lights.html</h3>
+<p>Features:</p>
+<p>
+	<ul>
+		<li>the same like cube-ratation</li>
+		<li>observe lights :P</li>
+	</ul>
+</p>
