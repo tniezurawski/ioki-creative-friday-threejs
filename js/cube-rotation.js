@@ -90,8 +90,8 @@ plane.castShadow = true;
 plane.receiveShadow = true;
 // plane.position.z = -100;
 
-directionalLight.position.x = -100;
-directionalLight.position.y = 150;
+// directionalLight.position.x = -10;
+// directionalLight.position.y = 150;
 // directionalLight.position.set(1, 1, 1).normalize();
 // directionalLight.castShadow = true;
 // directionalLight.shadowCameraVisible = true;
@@ -99,13 +99,13 @@ directionalLight.position.set(0, 2, 2);
 directionalLight.target.position.set(0, 0, 0);
 directionalLight.castShadow = true;
 directionalLight.shadowDarkness = 0.5;
-// directionalLight.shadowCameraVisible = true; // only for debugging
+directionalLight.shadowCameraVisible = true; // only for debugging
 // these six values define the boundaries of the yellow box seen above
 directionalLight.shadowCameraNear = 2;
 directionalLight.shadowCameraFar = 20;
 directionalLight.shadowCameraLeft = -5;
 directionalLight.shadowCameraRight = 5;
-directionalLight.shadowCameraTop = 5;
+directionalLight.shadowCameraTop = 25;
 directionalLight.shadowCameraBottom = -5;
 
 // add objects to scene
