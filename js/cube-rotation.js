@@ -66,8 +66,7 @@ var geometry = new THREE.CubeGeometry(4,4,4),
 	material = new THREE.MeshLambertMaterial( {color: config.cubeColor, wireframe: config.wireframe} ),
 	cube = new THREE.Mesh(geometry, material),
 	directionalLight = new THREE.DirectionalLight(0xffffff, 1),
-	// ambientLight = new THREE.AmbientLight(0x000044),
-	planeGeometry = new THREE.PlaneGeometry( 15, 15 ),
+	planeGeometry = new THREE.PlaneGeometry( 25, 25 ),
 	planeMaterial = new THREE.MeshLambertMaterial( { color: 0xe0e0e0, overdraw: 0.5 } ),
 	plane = new THREE.Mesh( planeGeometry, planeMaterial );
 
@@ -82,37 +81,31 @@ cube.rotation.x = 10;
 cube.position.y = 1.5;
 cube.castShadow = true;
 cube.receiveShadow = true;
-// plane.rotation.z = degrees(-90);
 plane.rotation.x = degrees(-75);
 plane.rotation.z = degrees(45);
 plane.position.y = -2;
+plane.position.z = -2;
 plane.castShadow = true;
 plane.receiveShadow = true;
-// plane.position.z = -100;
 
-// directionalLight.position.x = -10;
-// directionalLight.position.y = 150;
-// directionalLight.position.set(1, 1, 1).normalize();
-// directionalLight.castShadow = true;
-// directionalLight.shadowCameraVisible = true;
-directionalLight.position.set(0, 2, 2);
+directionalLight.position.set(1, 1, 1).normalize();
+directionalLight.castShadow = true;
+directionalLight.position.set(3, 2, 2);
 directionalLight.target.position.set(0, 0, 0);
 directionalLight.castShadow = true;
 directionalLight.shadowDarkness = 0.5;
-directionalLight.shadowCameraVisible = true; // only for debugging
-// these six values define the boundaries of the yellow box seen above
 directionalLight.shadowCameraNear = 2;
 directionalLight.shadowCameraFar = 20;
 directionalLight.shadowCameraLeft = -5;
 directionalLight.shadowCameraRight = 5;
-directionalLight.shadowCameraTop = 25;
+directionalLight.shadowCameraTop = 5;
 directionalLight.shadowCameraBottom = -5;
+// directionalLight.shadowCameraVisible = true;
 
 // add objects to scene
 scene.add(cube);
 scene.add(plane);
 scene.add(directionalLight);
-// scene.add(ambientLight);
 
 // camera settings
 camera.position.z = 30;
