@@ -17,6 +17,7 @@ var State = function(){
 
 	this.actualItem = {};
 	this.actualItemMoveable = true;
+	this.actualItemPosition = { x: 9, y: 2, z: 4 };
 
 	this.actualPlaceholder = {};
 
@@ -31,6 +32,7 @@ var State = function(){
 	}
 }
 var state = new State();
+console.log(state);
 
 var items = [],
 	numberOfItems = 0;
@@ -121,7 +123,7 @@ function init(){
 	camera.lookAt(scene.position);
 
 	initGrid();
-	// initGameTable();
+	initGameTable();
 }
 
 function initGrid() {
@@ -152,9 +154,13 @@ function initGrid() {
 }
 
 function initGameTable(){
-	for(var y = 0; y <= 5; y++){
-		for(var x = 0; x <= 10; x++){
-			for(var z = 0; z <= 5; z++){
+	for(var x = 0; x < 10; x++){
+		if(!state.table[x]) state.table[x] = [];
+
+		for(var y = 0; y <= 5; y++){
+			if(!state.table[x][y]) state.table[x][y] = [];
+
+			for(var z = 0; z < 5; z++){
 				state.table[x][y][z] = 0;
 			}
 		}
@@ -166,14 +172,25 @@ function initGameTable(){
 */
 function gameflow(){
 	var time = (new Date()).getTime(),
-		move = true;
+		move = true,
+		temp;
 
 	state.timeDifference = time - state.lastTime;
 
-	if(state.actualItem.position.y > (state.accuracy + state.actualItem.geometry.height / 2)){
+	calculateActualPosition();
+
+	if(withoutCollisions()){
 		state.actualItem.position.y -= state.timeDifference * state.speed;
+		// console.log('actualItem position y : ' + state.actualItem.position.y);
 	}else{
-		state.actualItem.position.y = 0 + state.actualItem.geometry.height / 2;
+		// console.log('b');
+		markPosition();
+		console.log('\nstate.actualItemPosition.y: ' + state.actualItemPosition.y);
+		temp = state.actualItemPosition.y;
+		calculateActualPosition();
+
+		console.log('state.actualItemPosition.y: ' + state.actualItemPosition.y);
+		state.actualItem.position.y = temp + state.actualItem.geometry.height / 2;
 		state.actualItemMoveable = false;
 		state.generateNewItem = true;
 	}
@@ -185,14 +202,40 @@ function gameflow(){
 		}
 	}
 
-	// console.log(state.actualItem.position.y);
-
 	if(state.generateNewItem){
 		generateNewItem();
 	}
 
 	// update lastTime
 	state.lastTime = time;
+}
+
+function withoutCollisions(){
+	if((state.table[state.actualItemPosition.x][state.actualItemPosition.y][state.actualItemPosition.z] === 0) && (state.actualItem.position.y > (state.accuracy + state.actualItem.geometry.height / 2))){
+		return true;
+	}else{
+		return false;
+	}
+}
+
+function calculateActualPosition(){
+	if(state.actualItemPosition.y != parseInt((state.actualItem.position.y + state.speed - 0.5),10)){
+		console.log('new state.actualItemPosition.y: ' + parseInt((state.actualItem.position.y + state.speed - 0.5),10));
+	}
+
+	state.actualItemPosition = {
+		x: state.actualItem.position.x - 0.5,
+		y: parseInt((state.actualItem.position.y + state.speed - 0.5),10),
+		z: state.actualItem.position.z - 0.5
+	}
+
+	placeholderPositionY();
+	//console.log('x: ' + state.actualItemPosition.x + ' y: ' + state.actualItemPosition.y + ' z: ' + state.actualItemPosition.z);
+}
+
+function markPosition(){
+	state.table[state.actualItemPosition.x][state.actualItemPosition.y][state.actualItemPosition.z] = 1;
+	placeholderPositionY();
 }
 
 function generateNewItem(){
@@ -223,4 +266,14 @@ function generateCube(){
 	state.speed = 0.001;
 	state.actualItem = items[numberOfItems];
 	numberOfItems++;
+}
+
+function placeholderPositionY(){
+	var _y = 0;
+	for(var y = 4; y >= 0; y--){
+		if(state.table[state.actualItemPosition.x][y][state.actualItemPosition.z] === 0){
+			_y = y;
+		}
+	}
+	state.actualPlaceholder.position.y = _y + 0.01;
 }
