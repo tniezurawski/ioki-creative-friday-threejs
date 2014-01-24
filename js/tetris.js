@@ -12,6 +12,7 @@ var State = function(){
 	this.timeDifference;
 	this.speed = 0.001;
 	this.accuracy = this.speed * 5;
+	this.stop = false;
 
 	this.generateNewItem = false;
 
@@ -32,7 +33,7 @@ var State = function(){
 	}
 }
 var state = new State();
-console.log(state);
+// console.log(state);
 
 var items = [],
 	numberOfItems = 0;
@@ -44,7 +45,6 @@ scene = new THREE.Scene();
 camera = new THREE.PerspectiveCamera( 45, window.innerWidth / window.innerHeight, 0.1, 1000 );
 renderer = new THREE.WebGLRenderer();
 projector = new THREE.Projector();
-
 renderer.setSize(window.innerWidth, window.innerHeight);
 renderer.shadowMapEnabled = true;
 renderer.shadowMapSoft = false;
@@ -62,17 +62,26 @@ document.body.appendChild(renderer.domElement);
 /*
 	CREATING OBJECTS
 */
-var planeGeometry = new THREE.PlaneGeometry( 10, 5 ),
-	planeMaterial = new THREE.MeshBasicMaterial( { color: 0xFACD95, wireframe: false } ),
+var geometry = new THREE.CubeGeometry(4,4,4),
+	material = new THREE.MeshLambertMaterial( {color: config.cubeColor, wireframe: config.wireframe} ),
+	cube = new THREE.Mesh(geometry, material),
+	sphere = new THREE.SphereGeometry( 0.2, 16, 8 ),
+	planeGeometry = new THREE.PlaneGeometry( 10, 5 ),
+	planeMaterial = new THREE.MeshLambertMaterial( { color: 0xe0e0e0, overdraw: 0.5 } ),
+	// planeMaterial = new THREE.MeshBasicMaterial( { color: 0xFACD95, wireframe: false } ),
 	plane = new THREE.Mesh( planeGeometry, planeMaterial ),
 	cubePlaceholderGeometry = new THREE.PlaneGeometry( 1, 1 ),
 	cubePlaceholderMaterial = new THREE.MeshBasicMaterial( { color: 0x999999, wireframe: false } ),
-	cubePlaceholder = new THREE.Mesh( cubePlaceholderGeometry, cubePlaceholderMaterial );
+	cubePlaceholder = new THREE.Mesh( cubePlaceholderGeometry, cubePlaceholderMaterial ),
+	pointLight = new THREE.PointLight(0xffffff, 1, 100),
+	pointLightCube = new THREE.Mesh(sphere, new THREE.MeshBasicMaterial({color: 0xff0040})),
+	pointLight2 = new THREE.PointLight(0xffffff, 1, 100),
+	pointLightCube2 = new THREE.Mesh(sphere, new THREE.MeshBasicMaterial({color: 0x4000ff}));
 
 // helpers for imagination
-var axes = new THREE.AxisHelper(5);
-	axes.position = scene.position;
-	scene.add(axes);
+// var axes = new THREE.AxisHelper(5);
+// 	axes.position = scene.position;
+// 	scene.add(axes);
 
 /*
 	INITIALIZATION
@@ -108,16 +117,27 @@ function init(){
 	cubePlaceholder.rotation.x = degrees(-90);
 	cubePlaceholder.position.y = 0.01;
 
+	pointLight.position.set(2,5,2.5);
+	pointLightCube.position = pointLight.position;
+	pointLight2.position.set(8,5,2.5);
+	pointLightCube2.position = pointLight2.position;
+
+	scene.position.x = 5;
+
 	// add objects to scene
 	scene.add(plane);
 	scene.add(cubePlaceholder);
+	scene.add(pointLight);
+	// scene.add(pointLightCube);
+	scene.add(pointLight2);
+	// scene.add(pointLightCube2);
 
 	// set actual item
 	state.setActualItem(items[0]);
 	state.setActualPlaceholder(cubePlaceholder);
 
 	// camera settings
-	camera.position.x = 10;
+	camera.position.x = 5;
 	camera.position.y = 10;
 	camera.position.z = 15;
 	camera.lookAt(scene.position);
@@ -179,31 +199,22 @@ function gameflow(){
 
 	calculateActualPosition();
 
-	if(withoutCollisions()){
-		state.actualItem.position.y -= state.timeDifference * state.speed;
-		// console.log('actualItem position y : ' + state.actualItem.position.y);
-	}else{
-		// console.log('b');
-		markPosition();
-		console.log('\nstate.actualItemPosition.y: ' + state.actualItemPosition.y);
-		temp = state.actualItemPosition.y;
-		calculateActualPosition();
-
-		console.log('state.actualItemPosition.y: ' + state.actualItemPosition.y);
-		state.actualItem.position.y = temp + state.actualItem.geometry.height / 2;
-		state.actualItemMoveable = false;
-		state.generateNewItem = true;
-	}
-
-	if(state.speed != 0.001){
-		state.speed -= 0.0005;
-		if(state.speed < 0.001){
-			state.speed = 0.001;
+	if(!state.stop){
+		if(withoutCollisions()){
+			state.actualItem.position.y -= state.timeDifference * state.speed;
+			// console.log('actualItem position y : ' + state.actualItem.position.y);
+		}else{
+			// console.log('state.actualItem.position.y: ' + state.actualItem.position.y);
+			state.actualItemMoveable = false;
+			markPosition();
 		}
-	}
 
-	if(state.generateNewItem){
-		generateNewItem();
+		if(state.speed != 0.001){
+			state.speed -= 0.0005;
+			if(state.speed < 0.001){
+				state.speed = 0.001;
+			}
+		}
 	}
 
 	// update lastTime
@@ -220,7 +231,7 @@ function withoutCollisions(){
 
 function calculateActualPosition(){
 	if(state.actualItemPosition.y != parseInt((state.actualItem.position.y + state.speed - 0.5),10)){
-		console.log('new state.actualItemPosition.y: ' + parseInt((state.actualItem.position.y + state.speed - 0.5),10));
+		// console.log('new state.actualItemPosition.y: ' + parseInt((state.actualItem.position.y + state.speed - 0.5),10));
 	}
 
 	state.actualItemPosition = {
@@ -234,12 +245,18 @@ function calculateActualPosition(){
 }
 
 function markPosition(){
-	state.table[state.actualItemPosition.x][state.actualItemPosition.y][state.actualItemPosition.z] = 1;
+	// console.log('*** Mark Position ***');
+	// console.log('[' + state.actualItemPosition.x + '][' + parseInt((state.actualItem.position.y + state.speed),10) + '][' + state.actualItemPosition.z + ']');
+	state.table[state.actualItemPosition.x][parseInt((state.actualItem.position.y + state.speed),10)][state.actualItemPosition.z] = 1;
+	checklines(state.actualItemPosition.x,parseInt((state.actualItem.position.y + state.speed),10), state.actualItemPosition.z);
+	// console.log(parseInt((state.actualItem.position.y + state.speed),10)) + 0.5;
+	state.actualItem.position.y = parseInt((state.actualItem.position.y + state.speed),10) + 0.5;
+	generateNewItem();
 	placeholderPositionY();
 }
 
 function generateNewItem(){
-	console.log('generate new item');
+	// console.log('--- generate new item --- nr: ' + items.length);
 
 	generateCube();
 
@@ -249,7 +266,10 @@ function generateNewItem(){
 
 function generateCube(){
 	var newCubeGeometry = new THREE.CubeGeometry(1,1,1,1,1),
-		newCubeMaterial = new THREE.MeshBasicMaterial({color: 0x00ff00, opacity: 0.2}),
+		randomed = parseInt(Math.random() * colors.length),
+		randomColor = colors[randomed],
+		newCubeMaterial = new THREE.MeshLambertMaterial( { color: randomColor, overdraw: 0.5 } ),
+		// newCubeMaterial = new THREE.MeshBasicMaterial({color: randomColor, opacity: 0.2}),
 		newCube = new THREE.Mesh(newCubeGeometry, newCubeMaterial);
 
 	newCube.position.x = newCubeGeometry.width / 2;
@@ -276,4 +296,26 @@ function placeholderPositionY(){
 		}
 	}
 	state.actualPlaceholder.position.y = _y + 0.01;
+}
+
+function checklines(xS,yS,zS){
+	// check x
+	var removeLine = true;
+	for(var x = 0; x < 10; x++){
+		if(state.table[x][yS][zS] === 0) removeLine = false;
+	}
+
+	console.log('Remove line X: ' + removeLine);
+
+	// check z
+	removeLine = true;
+	for(var z = 0; z < 5; z++){
+		if(state.table[xS][yS][z] === 0) removeLine = false;
+	}
+
+	console.log('Remove line Z: ' + removeLine);
+}
+
+function toggleStop(){
+	state.stop = (state.stop) ? false : true;
 }
