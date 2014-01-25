@@ -21,3 +21,5 @@ Thanks to IOKI.
 		<li>play with mouse to rotate the cube</li>
 	</ul>
 </p>
+<h3>Tetris 3D - tetris.html</h3>
+<p><strong>In progress</strong>. Old and very classic game Tetris in 3D edition.</p>
