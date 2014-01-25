@@ -16,6 +16,7 @@ keypress.combo("p", function(){
 
 keypress.combo("space", function() {
 	state.speed += 0.004;
+	addScore(1);
 });
 
 function goUp(){
