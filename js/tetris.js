@@ -295,12 +295,20 @@ function generateCube(){
 }
 
 function placeholderPositionY(){
-	var _y = 0;
-	for(var y = 4; y >= 0; y--){
-		if(state.table[state.actualItemPosition.x][y][state.actualItemPosition.z].exists === 0){
-			_y = y;
+	var _y = 0,
+		y = state.actualItemPosition.y,
+		search = true;
+
+	while(y >= 0 && search){
+		if(state.table[state.actualItemPosition.x][y][state.actualItemPosition.z].exists === 1){
+			_y = y + 1;
+			search = false;
 		}
+		y--;
 	}
+
+	// console.log('_y: ' + _y);
+
 	state.actualPlaceholder.position.y = _y + 0.01;
 }
 
