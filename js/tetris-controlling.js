@@ -20,7 +20,7 @@ keypress.combo("space", function() {
 
 function goUp(){
 	if(state.actualItem.position.z >= (1 + state.actualItem.geometry.depth / 2) && state.actualItemMoveable){
-		if(state.table[state.actualItemPosition.x][state.actualItemPosition.y][state.actualItemPosition.z  - 1] === 0){
+		if(state.table[state.actualItemPosition.x][state.actualItemPosition.y][state.actualItemPosition.z  - 1].exists === 0){
 	    	placeholderPositionY();
 	    	state.actualItem.position.z -= config.step;
 	    	state.actualPlaceholder.position.z -= config.step;
@@ -30,7 +30,7 @@ function goUp(){
 
 function goDown(){
 	if(state.actualItem.position.z <= (4 - state.actualItem.geometry.depth / 2) && state.actualItemMoveable){
-		if(state.table[state.actualItemPosition.x][state.actualItemPosition.y][state.actualItemPosition.z  + 1] === 0){
+		if(state.table[state.actualItemPosition.x][state.actualItemPosition.y][state.actualItemPosition.z  + 1].exists === 0){
 	    	placeholderPositionY();
 	    	state.actualItem.position.z += config.step;
 	    	state.actualPlaceholder.position.z += config.step;
@@ -40,7 +40,7 @@ function goDown(){
 
 function goLeft(){
 	if(state.actualItem.position.x >= (1 + state.actualItem.geometry.width / 2) && state.actualItemMoveable){
-		if(state.table[state.actualItemPosition.x - 1][state.actualItemPosition.y][state.actualItemPosition.z] === 0){
+		if(state.table[state.actualItemPosition.x - 1][state.actualItemPosition.y][state.actualItemPosition.z].exists === 0){
 			placeholderPositionY();
 		    state.actualItem.position.x -= config.step;
 		    state.actualPlaceholder.position.x -= config.step;
@@ -50,7 +50,7 @@ function goLeft(){
 
 function goRight(){
 	if(state.actualItem.position.x <= (9 - state.actualItem.geometry.width / 2) && state.actualItemMoveable){
-		if(state.table[state.actualItemPosition.x + 1][state.actualItemPosition.y][state.actualItemPosition.z] === 0){
+		if(state.table[state.actualItemPosition.x + 1][state.actualItemPosition.y][state.actualItemPosition.z].exists === 0){
 		    placeholderPositionY();
 		    state.actualItem.position.x += config.step;
 		    state.actualPlaceholder.position.x += config.step;

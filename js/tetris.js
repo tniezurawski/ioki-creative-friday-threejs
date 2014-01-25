@@ -110,8 +110,6 @@ function init(){
 	plane.position.z = planeGeometry.height / 2;
 	plane.rotation.x = degrees(-90);
 
-	generateCube();
-
 	cubePlaceholder.position.x = cubePlaceholderGeometry.width / 2;
 	cubePlaceholder.position.z = cubePlaceholderGeometry.height / 2;
 	cubePlaceholder.rotation.x = degrees(-90);
@@ -143,6 +141,7 @@ function init(){
 	camera.lookAt(scene.position);
 
 	initGrid();
+	generateCube();
 	initGameTable();
 }
 
@@ -181,7 +180,10 @@ function initGameTable(){
 			if(!state.table[x][y]) state.table[x][y] = [];
 
 			for(var z = 0; z < 5; z++){
-				state.table[x][y][z] = 0;
+				state.table[x][y][z] = {
+					exists: 0,
+					id: 0
+				};
 			}
 		}
 	}
@@ -202,9 +204,7 @@ function gameflow(){
 	if(!state.stop){
 		if(withoutCollisions()){
 			state.actualItem.position.y -= state.timeDifference * state.speed;
-			// console.log('actualItem position y : ' + state.actualItem.position.y);
 		}else{
-			// console.log('state.actualItem.position.y: ' + state.actualItem.position.y);
 			state.actualItemMoveable = false;
 			markPosition();
 		}
@@ -222,7 +222,7 @@ function gameflow(){
 }
 
 function withoutCollisions(){
-	if((state.table[state.actualItemPosition.x][state.actualItemPosition.y][state.actualItemPosition.z] === 0) && (state.actualItem.position.y > (state.accuracy + state.actualItem.geometry.height / 2))){
+	if((state.table[state.actualItemPosition.x][state.actualItemPosition.y][state.actualItemPosition.z].exists === 0) && (state.actualItem.position.y > (state.accuracy + state.actualItem.geometry.height / 2))){
 		return true;
 	}else{
 		return false;
@@ -241,23 +241,24 @@ function calculateActualPosition(){
 	}
 
 	placeholderPositionY();
-	//console.log('x: ' + state.actualItemPosition.x + ' y: ' + state.actualItemPosition.y + ' z: ' + state.actualItemPosition.z);
 }
 
 function markPosition(){
-	// console.log('*** Mark Position ***');
-	// console.log('[' + state.actualItemPosition.x + '][' + parseInt((state.actualItem.position.y + state.speed),10) + '][' + state.actualItemPosition.z + ']');
-	state.table[state.actualItemPosition.x][parseInt((state.actualItem.position.y + state.speed),10)][state.actualItemPosition.z] = 1;
-	checklines(state.actualItemPosition.x,parseInt((state.actualItem.position.y + state.speed),10), state.actualItemPosition.z);
-	// console.log(parseInt((state.actualItem.position.y + state.speed),10)) + 0.5;
-	state.actualItem.position.y = parseInt((state.actualItem.position.y + state.speed),10) + 0.5;
+	var x = state.actualItemPosition.x,
+		y = parseInt((state.actualItem.position.y + state.speed),10),
+		z = state.actualItemPosition.z;
+
+	state.table[x][y][z].exists = 1;
+	state.table[x][y][z].id = state.actualItem.id;
+
+	checklines(x,y,z);
+
+	state.actualItem.position.y = y + 0.5;
 	generateNewItem();
 	placeholderPositionY();
 }
 
 function generateNewItem(){
-	// console.log('--- generate new item --- nr: ' + items.length);
-
 	generateCube();
 
 	state.actualItemMoveable = true;
@@ -291,7 +292,7 @@ function generateCube(){
 function placeholderPositionY(){
 	var _y = 0;
 	for(var y = 4; y >= 0; y--){
-		if(state.table[state.actualItemPosition.x][y][state.actualItemPosition.z] === 0){
+		if(state.table[state.actualItemPosition.x][y][state.actualItemPosition.z].exists === 0){
 			_y = y;
 		}
 	}
@@ -299,21 +300,71 @@ function placeholderPositionY(){
 }
 
 function checklines(xS,yS,zS){
-	// check x
-	var removeLine = true;
+	var removeLineX = removeLineZ = true,
+		lineToRemoveX, lineToRemoveY, lineToRemoveZ,
+		elementsToRemove = [];
+
+	// check X
 	for(var x = 0; x < 10; x++){
-		if(state.table[x][yS][zS] === 0) removeLine = false;
+		if(state.table[x][yS][zS].exists === 0) removeLineX = false;
 	}
 
-	console.log('Remove line X: ' + removeLine);
-
-	// check z
-	removeLine = true;
+	// check Z
 	for(var z = 0; z < 5; z++){
-		if(state.table[xS][yS][z] === 0) removeLine = false;
+		if(state.table[xS][yS][z].exists === 0) removeLineZ = false;
 	}
 
-	console.log('Remove line Z: ' + removeLine);
+	if(removeLineZ || removeLineX){
+		if(removeLineZ){
+			for(var z = 0; z < 5; z++){
+				elementsToRemove.push(state.table[xS][yS][z].id);
+				state.table[xS][yS][z].exists = 0;
+			}
+		}
+		if(removeLineX){
+			for(var x = 0; x < 10; x++){
+				elementsToRemove.push(state.table[x][yS][zS].id);
+				state.table[x][yS][zS].exists = 0;
+			}
+		}
+		removeBlocks(elementsToRemove);
+	}
+}
+
+function removeBlocks(elementsToRemove){
+	var removed, e,
+		numberOfRemovedElements = 0;
+
+	for(var i = scene.children.length - 1; i >= 0; i--){
+		/*	Starts from the end because blocks are add to the end of the scene.children table
+			At the begining are other static elements
+			Thanks to while statement loop is running only if necessary and for as short time as possible
+		*/
+		removed = false;
+		e = 0;
+
+		while(!removed && e < elementsToRemove.length && elementsToRemove.length > 0){
+			if(scene.children[i].id === elementsToRemove[e]){
+				numberOfRemovedElements++;
+
+				// removing animation
+				if(config.animateRemoving) removeBlockWithAnimation(i, numberOfRemovedElements);
+				else scene.remove(scene.children[i]);
+
+				elementsToRemove.splice(e,1);
+				removed = true;
+			}
+			e++;
+		}
+	}
+}
+
+function removeBlockWithAnimation(index, delay){
+	// delay = numberOfRemovedElements
+
+	setTimeout(function(){
+		scene.remove(scene.children[index]);
+	}, config.animateRemovingTime*delay);
 }
 
 function toggleStop(){

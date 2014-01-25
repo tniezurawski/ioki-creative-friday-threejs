@@ -1,5 +1,7 @@
 var Configuration = function(){
 	this.step = 1;
+	this.animateRemoving = true;
+	this.animateRemovingTime = 50;	// in milliseconds
 }
 
 var config = new Configuration();
