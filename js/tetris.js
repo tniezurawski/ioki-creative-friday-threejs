@@ -1,5 +1,8 @@
 var scene, camera, renderer, projector;
 var windowHalfX, windowHalfY;
+var scoreBox = document.getElementById('score'),
+	bonusBox = document.getElementById('bonus'),
+	controlBox = document.getElementById('control');
 
 /*
 	GAME STATE
@@ -13,6 +16,7 @@ var State = function(){
 	this.speed = 0.001;
 	this.accuracy = this.speed * 5;
 	this.stop = false;
+	this.score = 0;
 
 	this.generateNewItem = false;
 
@@ -42,7 +46,7 @@ var items = [],
 	Setup THREEjs
 */
 scene = new THREE.Scene();
-camera = new THREE.PerspectiveCamera( 45, window.innerWidth / window.innerHeight, 0.1, 1000 );
+camera = new THREE.PerspectiveCamera( 33, 800 / 450, 0.1, 1000 );
 renderer = new THREE.WebGLRenderer();
 projector = new THREE.Projector();
 renderer.setSize(window.innerWidth, window.innerHeight);
@@ -57,7 +61,7 @@ renderer.shadowMapBias = 0.0039;
 renderer.shadowMapDarkness = 0.5;
 renderer.shadowMapWidth = 1024;
 renderer.shadowMapHeight = 1024;
-document.body.appendChild(renderer.domElement);
+document.getElementById('game').appendChild(renderer.domElement);
 
 /*
 	CREATING OBJECTS
@@ -256,6 +260,7 @@ function markPosition(){
 	state.actualItem.position.y = y + 0.5;
 	generateNewItem();
 	placeholderPositionY();
+	addScore(10);
 }
 
 function generateNewItem(){
@@ -301,7 +306,7 @@ function placeholderPositionY(){
 
 function checklines(xS,yS,zS){
 	var removeLineX = removeLineZ = true,
-		lineToRemoveX, lineToRemoveY, lineToRemoveZ,
+		lineToRemoveX, lineToRemoveZ,
 		elementsToRemove = [];
 
 	// check X
@@ -320,14 +325,18 @@ function checklines(xS,yS,zS){
 				elementsToRemove.push(state.table[xS][yS][z].id);
 				state.table[xS][yS][z].exists = 0;
 			}
+			if(!removeLineX) addBonus(1);
 		}
 		if(removeLineX){
 			for(var x = 0; x < 10; x++){
 				elementsToRemove.push(state.table[x][yS][zS].id);
 				state.table[x][yS][zS].exists = 0;
 			}
+			if(!removeLineZ) addBonus(2);
 		}
 		removeBlocks(elementsToRemove);
+
+		if(removeLineZ && removeLineX) addBonus(3);
 	}
 }
 
@@ -367,6 +376,48 @@ function removeBlockWithAnimation(index, delay){
 	}, config.animateRemovingTime*delay);
 }
 
+function addScore(value){
+	state.score += value;
+	scoreBox.innerHTML = state.score;
+}
+
+function addBonus(code){
+	switch(code){
+		case 1:
+			// code 1 - 1 line bonus
+			bonusBox.innerHTML = '+100 BONUS - 1 line';
+			addScore(100);
+			break;
+		case 2:
+			// code 2 - 1 long line bonus
+			bonusBox.innerHTML = '+350 BONUS - 1 long lines';
+			addScore(350);
+			break;
+		case 3:
+			// code 3 - 2 lines bonus
+			bonusBox.innerHTML = '+600 BONUS - 2 lines';
+			addScore(600);
+			break;
+	}
+	bonusBox.className = bonusBox.className + " anim-bonus";
+	setTimeout(function(){
+		bonusBox.className = "bonus-container score";
+	}, config.bonusAnimationTime);
+}
+
 function toggleStop(){
-	state.stop = (state.stop) ? false : true;
+	if(!state.stop){
+		state.stop = true;
+		controlBox.innerHTML = 'Play';
+		bonusBox.innerHTML = '--- Pause ---';
+	}else{
+		state.stop = false;
+		controlBox.innerHTML = 'Stop';
+		bonusBox.innerHTML = 'Play!';
+	}
+
+	bonusBox.className = bonusBox.className + " anim-bonus";
+	setTimeout(function(){
+		bonusBox.className = "bonus-container score";
+	}, config.bonusAnimationTime);
 }
